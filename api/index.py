@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 from fastapi import Query
+from pydantic import BaseModel
+
 app = FastAPI()
+
+class Event(BaseModel):
+    userId: str
+    eventName: str
+    eventDate: str
+
 
 # @app.get("/root")
 # async def root(name:str = Query(...)):
@@ -9,10 +17,10 @@ app = FastAPI()
 #     print(f"2.收到回傳結果:{name}")
 #     return {"message": "Hello FastAPI!"}
 
-@app.get("/page")
+@app.get("/")
 async def root():
+    return {"message":"Connected successfully!"}
 
-    return "Success!!"
 
 
 @app.post("/root_post3")
@@ -22,6 +30,10 @@ async def root_post(name:str = Query(...)):
     print(f"2.回傳結果:{res}")
 
     return {"message": "OK123"}
+
+@app.post("/push_user")
+async def push_user(event:Event):
+    print(f"收到 {event.userId}, {event.eventName}, {event.eventDate}")
 
 
 # if __name__ == "__main__":
