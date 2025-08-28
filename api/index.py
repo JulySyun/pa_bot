@@ -34,7 +34,7 @@ async def root_post(name:str = Query(...)):
 @app.post("/push_user")
 async def push_user(event:Event):
     print(f"收到 {event.userId}, {event.eventName}, {event.eventDate}")
-
+    return f"收到 {event.userId}, {event.eventName}, {event.eventDate}"
 
 # if __name__ == "__main__":
 #     uvicorn app:app --host 0.0.0.0 --port 5000 --reloaduvicorn app:app --host 0.0.0.0 --port 5000 --reload
