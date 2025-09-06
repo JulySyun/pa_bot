@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 from datetime import datetime
 
@@ -31,7 +32,7 @@ from linebot.v3.webhooks import (
 
 from google.oauth2.service_account import Credentials
 
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from pathlib import Path
 
 # 新增助理、我要新增事項
@@ -40,12 +41,12 @@ from pathlib import Path
 # 先掃觸發時間 => 時間到 => 讀取提醒頻率 =>將觸發時間欄位 修改 下次要觸發的時間
 
 app = FastAPI()
-env = dotenv_values("ENV.env")
+load_dotenv()
 
 class LineSetting:
     def __init__(self):
-        self.LINE_CHANNEL_ACCESS_TOKEN = env["LINE_CHANNEL_ACCESS_TOKEN"]
-        self.LINE_CHANNEL_SECRET = env["LINE_CHANNEL_SECRET"]
+        self.LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+        self.LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
         self.configuration = Configuration(access_token=self.LINE_CHANNEL_ACCESS_TOKEN)
         self.handler = WebhookHandler(self.LINE_CHANNEL_SECRET)
         self.api_client = ApiClient(configuration=self.configuration)
@@ -56,22 +57,27 @@ class GSheetSetting:
         self.SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
                   "https://www.googleapis.com/auth/drive"]
 
-        if env["ENV"] == "LOCAL":
-            search_dir = Path("")
-        else:
-            search_dir = Path("api")
+        # if os.getenv("ENV") == "LOCAL":
+        #     search_dir = Path("")
+        # else:
+        #     search_dir = Path("api")
+        #
+        # matches = [f for f in search_dir.iterdir() if f.is_file() and "pa-bot" in f.name and f.suffix==".json"]
+        # self.SERVICE_ACCOUNT_FILE = str(matches[0])
 
-        matches = [f for f in search_dir.iterdir() if f.is_file() and "pa-bot" in f.name and f.suffix==".json"]
-        self.SERVICE_ACCOUNT_FILE = str(matches[0])
 
+        sa_json = os.environ.get("GSPREAD_SA_JSON")
 
-        cd = Credentials.from_service_account_file(
-            self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES
-        )
+        creds = json.loads(sa_json)
+        gc = gspread.service_account_from_dict(creds)
 
-        gc = gspread.authorize(cd)
+        # cd = Credentials.from_service_account_file(
+        #     self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES
+        # )
 
-        self.spreadsheet = gc.open_by_key(env["SPREADSHEET_ID_FOR_CUSTOMER"])
+        # gc = gspread.authorize(cd)
+
+        self.spreadsheet = gc.open_by_key(os.getenv("SPREADSHEET_ID_FOR_CUSTOMER"))
 
 class Event(BaseModel):
     userId: str
