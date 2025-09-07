@@ -331,16 +331,17 @@ def handle_postback(event):
             msg = ""
             for index, record in enumerate(records):
                 if index != len(records)-1:
-                    msg += record["事件名稱"] + ":" + record["觸發時間"]+"\n\n"
+                    msg += f"{record["事件名稱"] }:{record["觸發時間"]}\n\n"
                 else:
-                    msg += record["事件名稱"] + ":" + record["觸發時間"]
+                    msg += f"{record["事件名稱"]}:{record["觸發時間"]}"
 
             reply_message(event, msg)
 
 
         except gspread.WorksheetNotFound:
             reply_message(event, "提醒助理尚未建立，故無法查詢!")
-
+        except (Exception,) as e:
+            print(e)
 #回覆的方法
 def reply_message(event, reply_msg):
     reply_request = ReplyMessageRequest(
