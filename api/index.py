@@ -206,10 +206,12 @@ def handle_message(event):
         if user_msg == "help":
             reply_msg = ("可以在對話框中輸入以下指令:\n\n"
                          "➡格式為 事務名稱 日期 時間\n\n"
-                         "正確指令:\n"
+                         "舉例正確指令:\n"
                          "打掃 20250901 13:30\n\n"
+                         "打掃 2025/09/01 1330\n\n"
+                         "打掃 2025/09/01\n\n"
                          "默認指令:\n"
-                         "打掃 20250901\n"
+                         "打掃 20250901\n\n"
                          "(當沒有輸入時間則默認00:00)\n\n"
                          "錯誤指令:\n"
                          "指輸入事務名稱或只輸入時間，則無效")
@@ -219,7 +221,7 @@ def handle_message(event):
             try:
                 pack = user_msg.split(" ", 1)
                 if len(pack) != 2:
-                    reply_msg = "不符合格式"
+                    reply_msg = "您輸入的不符合格式，請重新輸入"
                     reply_message(event, reply_msg)
                     return
 
@@ -291,7 +293,6 @@ def handle_message(event):
                                              f"觸發時間:{user_state[user_id][2]}\n"
                                              f"執行頻率: 無")
 
-
                 del user_state[user_id]
 
 
@@ -310,7 +311,7 @@ def handle_follow(event):
 
     reply_message(event, reply_msg)
 
-
+#圖文選單功能相關
 @line.handler.add(PostbackEvent)
 def handle_postback(event):
     tag = event.postback.data
@@ -335,8 +336,10 @@ def handle_postback(event):
                     msg += f"{record["事件名稱"] }:{record["觸發時間"]}\n\n"
                 else:
                     msg += f"{record["事件名稱"]}:{record["觸發時間"]}"
-
-            reply_message(event, msg)
+            if msg != "":
+                reply_message(event, msg)
+            else:
+                reply_message(event, "目前尚未有事項紀錄哦")
 
         except gspread.WorksheetNotFound:
             reply_message(event, "提醒助理尚未建立，故無法查詢!")
