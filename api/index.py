@@ -23,7 +23,7 @@ from linebot.v3.messaging import (
     ApiClient,
     MessagingApi,
     ReplyMessageRequest,
-    TextMessage
+    TextMessage, PushMessageRequest
 )
 from linebot.v3.webhooks import (
     MessageEvent,
@@ -83,6 +83,7 @@ class Event(BaseModel):
     userId: str
     eventName: str
     eventDate: str
+    eventFreq: str
 
 class DateRule:
     def __init__(self):
@@ -358,13 +359,17 @@ def reply_message(event, reply_msg):
         print(e)
 
 
-# def push_message(self, user_id, message):
-#     self.messaging_api.push_message(
-#         PushMessageRequest(
-#             to=user_id,
-#             messages=[TextMessage(text=message)]
-#         )
-#     )
+def push_message(user_id, message):
+    try:
+        push_request = PushMessageRequest(
+            to=user_id,
+            messages=[TextMessage(text=message)]
+        )
+        line.messaging_api.push_message(push_request)
+
+    except (Exception,) as e:
+        print(e)
+
 
 
 @app.get("/")
@@ -383,8 +388,13 @@ async def root_post(name:str = Query(...)):
 
 @app.post("/push_user")
 async def push_user(event:Event):
-    print(f"收到 {event.userId}, {event.eventName}, {event.eventDate}")
-    return f"收到 {event.userId}, {event.eventName}, {event.eventDate}"
+    print(f"收到 {event.userId}, {event.eventName}, {event.eventDate}, {event.eventFreq}")
+    push_message(event.userId, f"📢小助理提醒\n"
+                                f"事件名稱:{event.eventName}\n"
+                                f"觸發時間:{event.eventDate}\n"
+                                f"執行頻率:{event.eventFreq}")
+
+    return f"GAS觸發提醒 {event.userId}, {event.eventName}, {event.eventDate}, {event.eventFreq}"
 
 
 
