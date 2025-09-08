@@ -156,7 +156,7 @@ class DateRule:
 
     def get_time_fmt(self, input_time):
         input_split = input_time.split(":")
-        print(input_split)
+
         if len(input_split) == 1:
 
             if len(input_split[0]) == 4:
@@ -184,7 +184,6 @@ user_state = {}
 async def callback(request: Request):
     signature = request.headers.get("X-Line-Signature")
     body = await request.body()
-    print(body)
     try:
         # line.handler.handle(body.decode("utf-8"), signature)
         await asyncio.to_thread(line.handler.handle, body.decode("utf-8"), signature)
@@ -214,6 +213,8 @@ def handle_message(event):
                          "(當沒有輸入時間則默認00:00)\n\n"
                          "錯誤指令:\n"
                          "指輸入事務名稱或只輸入時間，則無效")
+            reply_message(event, reply_msg)
+
         else:
             try:
                 pack = user_msg.split(" ", 1)
@@ -290,9 +291,9 @@ def handle_message(event):
                                              f"觸發時間:{user_state[user_id][2]}\n"
                                              f"執行頻率: 無")
 
-                print(user_state)
+
                 del user_state[user_id]
-                print(user_state)
+
 
         except (Exception,) as e:
             print(f"錯誤!{e}")
@@ -337,18 +338,21 @@ def handle_postback(event):
 
             reply_message(event, msg)
 
-
         except gspread.WorksheetNotFound:
             reply_message(event, "提醒助理尚未建立，故無法查詢!")
         except (Exception,) as e:
             print(e)
+
 #回覆的方法
 def reply_message(event, reply_msg):
-    reply_request = ReplyMessageRequest(
-        reply_token=event.reply_token,
-        messages=[TextMessage(text=reply_msg)]
-    )
-    line.messaging_api.reply_message_with_http_info(reply_request)
+    try:
+        reply_request = ReplyMessageRequest(
+            reply_token=event.reply_token,
+            messages=[TextMessage(text=reply_msg)]
+        )
+        line.messaging_api.reply_message(reply_request)
+    except (Exception,) as e:
+        print(e)
 
 
 # def push_message(self, user_id, message):
