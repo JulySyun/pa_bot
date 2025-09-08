@@ -364,7 +364,7 @@ def reply_message(event, reply_msg):
 #     )
 
 
-@app.post("/")
+@app.get("/")
 async def root():
     return {"message":"Connected successfully!"}
 
